@@ -21,7 +21,28 @@ function Gameboard () {
         console.log(boardWithSquareValues);
     }
 
-    return {getBoard, placeMarker, printBoard};
+    const checkWinCondition = (player) => {
+        for (let i =0; i<rows; i++) {
+            if (board[i].every((square)=> square.getValue() === player)) {
+                return true;
+            }
+        }
+        for (let j = 0; j < columns; j++) {
+            if (board.every((row)=> row[j].getValue() === player)) {
+                return true;
+            }
+        }
+        if (
+            (board[0][0].getValue() === player && board[1][1].getValue() === player && board[2][2].getValue() === player) ||
+            (board[0][2].getValue() === player && board[1][1].getValue() === player && board[2][0].getValue() === player) 
+        ) {
+            return true;
+        }
+        return false;
+
+    }
+
+    return {getBoard, placeMarker, printBoard, checkWinCondition};
 
 
 
@@ -60,12 +81,12 @@ function GameController(
     let activePlayer = players[0];
     const switchPlayerTurn = () => {
         activePlayer = activePlayer === players[0] ? players[1] : players[0];
+        console.log(`${getActivePlayer().name}'s turn.`);
     }
     const getActivePlayer = () => activePlayer;
 
     const printNewRound = () => {
         board.printBoard();
-        console.log(`${getActivePlayer().name}'s turn.`);
     }
 
     const playRound = (index) => {
@@ -74,9 +95,14 @@ function GameController(
             `Dropping${getActivePlayer().name}'s token onto board`
         )
         board.placeMarker(square, getActivePlayer().token);
-
-        switchPlayerTurn();
+        
         printNewRound();
+
+        if (board.checkWinCondition(getActivePlayer().token)){
+            console.log(`${getActivePlayer().name} wins!`);
+        } else {
+        switchPlayerTurn();
+        }
     }
     printNewRound();
 
