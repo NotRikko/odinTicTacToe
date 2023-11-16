@@ -1,0 +1,17 @@
+#boardContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: grid;
+    grid-template: repeat(3, 200px)/repeat(3, 200px);
+    border: 1px solid black;
+}
+
+.square {
+    border: 1px solid black;
+    padding: 50px;
+    width:auto;
+    text-align: center;
+    font-size: 80px;
+}

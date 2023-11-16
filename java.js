@@ -9,16 +9,19 @@ function Gameboard () {
             board[i].push(Square());
         }
     }
+    const getSquare = (row,col) => board[row][col];
     const getBoard = () => board;
-    const placeMarker = (square, player) => {
+    const getPlayerBoard = () => board.map((row) => row.map((square) => square.getValue()));
+    const placeMarker =  (square, player) => {
         if (!square.getValue()) {
             square.addMarker(player);
         }
+        return getPlayerBoard();
     }
     
     const printBoard = () => {
-        const boardWithSquareValues = board.map((row) => row.map((square) => square.getValue()));
-        console.log(boardWithSquareValues);
+        const boardWithSquareValues = getPlayerBoard();
+        return boardWithSquareValues
     }
 
     const checkWinCondition = (player) => {
@@ -42,7 +45,7 @@ function Gameboard () {
 
     }
 
-    return {getBoard, placeMarker, printBoard, checkWinCondition};
+    return {getPlayerBoard, getSquare, getBoard, placeMarker, printBoard, checkWinCondition};
 
 
 
@@ -65,7 +68,7 @@ function Square() {
 
 function GameController(
     playerOneName = "Player One",
-    playerTwoName = "Player Two") {
+    playerTwoName = "Player Two",) {
     const board = Gameboard();
     const players = [
         {
@@ -95,8 +98,9 @@ function GameController(
             `Dropping${getActivePlayer().name}'s token onto board`
         )
         board.placeMarker(square, getActivePlayer().token);
-        
         printNewRound();
+        newGameDisplay.updateDisplay();
+
 
         if (board.checkWinCondition(getActivePlayer().token)){
             console.log(`${getActivePlayer().name} wins!`);
@@ -108,8 +112,39 @@ function GameController(
 
     return {
         playRound,
+        printNewRound
     }
 }
 
 
-const game = new GameController();
+const gameboard = Gameboard();
+const game = new GameController("Rikko","Rikko2",gameboard);
+const newGameDisplay = new DomDisplay(gameboard, game);
+newGameDisplay.updateDisplay();
+
+function DomDisplay(gameboard, game) {
+    const boardContainer = document.getElementById("boardContainer");
+    const displayBoard = () => {
+        const playerBoard = gameboard.getPlayerBoard();
+        console.log(playerBoard);
+        boardContainer.innerHTML = "";
+        for (let i=0; i<playerBoard.length; i++) {
+            for (let j=0; j<playerBoard[i].length; j++) {
+            const square = gameboard.getSquare(i,j);
+            const squareValue = square.getValue();
+            const squareElement = document.createElement("div");
+            const index = i * playerBoard.length + j;
+            squareElement.classList.add("square");
+            squareElement.textContent= squareValue != null ? squareValue: "";
+            squareElement.dataset.squareIndex = index;
+            boardContainer.appendChild(squareElement);
+            squareElement.addEventListener("click", () => game.playRound(index));
+            }
+        }
+    }
+    const updateDisplay = () => {
+        displayBoard();
+    }
+    return { updateDisplay };
+}
+
